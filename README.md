@@ -1,0 +1,4 @@
+gif
+===
+
+gif compress
