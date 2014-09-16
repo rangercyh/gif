@@ -1,0 +1,62 @@
+local szSource = "ABABCEDACCAABCCDDEAE"
+
+
+function lzwCode(szSource)
+	local szOutput = ""
+	local szStrToken = ""
+	local tbToken = {}
+	local nTokenNum = 0
+	local tbChar = {}
+	for szChar in string.gmatch(szSource, "%a") do
+		tbChar[szChar] = true
+		szStrToken = szStrToken .. szChar
+		if string.len(szStrToken) == 2 then
+			if tbToken[szStrToken] then
+				szStrToken = tbToken[szStrToken]
+			else
+				tbToken[szStrToken] = nTokenNum
+				nTokenNum = nTokenNum + 1
+				szOutput = szOutput .. string.sub(szStrToken, 1, 1)
+				szStrToken = szChar
+			end
+		end
+	end
+	return szOutput, tbChar
+end
+
+print(szSource)
+local szOutput, tbChar = lzwCode(szSource)
+print(szOutput)
+
+function lzwDecode(szCode, tbChar)
+	local szSource = ""
+	local szStrToken = ""
+	local tbToken = {}
+	local tbDeCodeToken = {}
+	local nTokenNum = 0
+	for szChar in string.gmatch(szCode, "%a") do
+		if tbChar[szChar] then
+			szStrToken = szStrToken .. szChar
+			if string.len(szStrToken) == 2 then
+				if tbToken[szStrToken] then
+					
+				else
+					tbToken[szStrToken] = nTokenNum
+					tbDeCodeToken[nTokenNum] = szStrToken
+					nTokenNum = nTokenNum + 1
+					szSource = szSource .. string.sub(szStrToken, 1, 1)
+					szStrToken = szChar
+				end
+			end
+		else
+			if tbDeCodeToken[szChar] then
+				
+			else
+				print("错误的LZW字符串")
+			end
+		end
+	end
+	return szSource
+end
+
+
