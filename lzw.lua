@@ -1,10 +1,10 @@
-local szSource = "ABABABABBBABABAACDACD"
+local szSource = "ABABABABBBABABAACDACDADCABAAABAB"
 
 function lzwCode(szSource)
-	local szOutput = ""
+	local tbOutput = {}
 	local szPrefix = ""
 	local tbToken = {}
-	local nTokenNum = 0
+	local nTokenNum = 6
 	for szChar in string.gmatch(szSource, "%a") do
 		if szPrefix == "" then
 			szPrefix = szChar
@@ -14,16 +14,16 @@ function lzwCode(szSource)
 			else
 				tbToken[szPrefix .. szChar] = nTokenNum
 				nTokenNum = nTokenNum + 1
-				szOutput = szOutput .. szPrefix
+				table.insert(tbOutput, szPrefix)
 				szPrefix = szChar
 			end
 		end
 	end
-	return szOutput
+	return tbOutput
 end
 
 print(szSource)
-print(lzwCode(szSource))
+print(table.concat(lzwCode(szSource), ","))
 
 
 
