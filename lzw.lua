@@ -1,13 +1,10 @@
-local szSource = "ABABABABBBABABAACDACDADCABAAABAB"
-local nBeginCode = 6
-
-function lzwCode(szSource)
+function lzwCode(szSource, nBeginCode)
 	local tbOutput = {}
 	local tbChar = {}
 	local szPrefix = ""
 	local tbToken = {}
 	local nTokenCode = nBeginCode
-	for szChar in string.gmatch(szSource, "%a") do
+	for szChar in string.gmatch(szSource, ".") do
 		tbChar[szChar] = true
 		if szPrefix == "" then
 			szPrefix = szChar
@@ -22,7 +19,9 @@ function lzwCode(szSource)
 			end
 		end
 	end
-	table.insert(tbOutput, szPrefix)
+	if szPrefix~= "" then
+		table.insert(tbOutput, szPrefix)
+	end
 	return tbOutput, tbChar
 end
 
@@ -49,7 +48,7 @@ function lzwDecodeToSource(szSource, tbDeCodeToken, szPrefix)
 	return szSource
 end
 
-function lzwDecode(tbCode, tbChar)
+function lzwDecode(tbCode, tbChar, nBeginCode)
 	local szSource = ""
 	local szPrefix = ""
 	local tbToken = {}
@@ -92,10 +91,23 @@ function lzwDecode(tbCode, tbChar)
 	return szSource
 end
 
+--[[字符串测试
+local szSource = "dsfakfjljsds  sdf\ \tfg\\ \ "
+local nBeginCode = 6
 print(szSource)
-local tbCode, tbChar = lzwCode(szSource)
+local tbCode, tbChar = lzwCode(szSource, nBeginCode)
 print(table.concat(tbCode, ","))
-print(lzwDecode(tbCode, tbChar))
+print(lzwDecode(tbCode, tbChar, nBeginCode))
+]]
 
-
-
+--[[文件测试
+local hFile = io.open("1.txt", "r")
+local szStr = hFile:read("*a")
+print("origin length = ", string.len(szStr))
+local tbCode, tbChar = lzwCode(szStr, 6)
+local hOutputFile = io.open("2.txt", "w")
+hOutputFile:write(table.concat(tbCode, ","))
+print("output length = ", #tbCode)
+local hDecodeFile = io.open("3.txt", "w")
+hDecodeFile:write(lzwDecode(tbCode, tbChar, 6))
+]]
