@@ -1,18 +1,14 @@
-local szSource = "AAABBBCCCDDD"
+local szSource = "ABABABABBBABABAACDACDADCABAAABAB"
 local nBeginCode = 6
-local tbChar = {
-	["A"] = true,
-	["B"] = true,
-	["C"] = true,
-	["D"] = true,
-}
 
 function lzwCode(szSource)
 	local tbOutput = {}
+	local tbChar = {}
 	local szPrefix = ""
 	local tbToken = {}
 	local nTokenCode = nBeginCode
 	for szChar in string.gmatch(szSource, "%a") do
+		tbChar[szChar] = true
 		if szPrefix == "" then
 			szPrefix = szChar
 		else
@@ -27,7 +23,15 @@ function lzwCode(szSource)
 		end
 	end
 	table.insert(tbOutput, szPrefix)
-	return tbOutput
+	return tbOutput, tbChar
+end
+
+function lzwFindFirstNormalChar(tbDeCodeToken, szCode)
+	local szNormalChar = szCode
+	while (tbDeCodeToken[tonumber(szNormalChar)]) do
+		szNormalChar = tbDeCodeToken[tonumber(szNormalChar)][1]
+	end
+	return szNormalChar
 end
 
 function lzwDecodeToSource(szSource, tbDeCodeToken, szPrefix)
@@ -61,8 +65,9 @@ function lzwDecode(tbCode, tbChar)
 				szSource = lzwDecodeToSource(szSource, tbDeCodeToken, szPrefix)
 			else
 				if tbDeCodeToken[tonumber(szCode)] then
-					tbToken[szPrefix .. tbDeCodeToken[tonumber(szCode)][1]] = nTokenCode
-					tbDeCodeToken[nTokenCode] = { szPrefix, tbDeCodeToken[tonumber(szCode)][1] }
+					local szSuffix = lzwFindFirstNormalChar(tbDeCodeToken, tbDeCodeToken[tonumber(szCode)][1])
+					tbToken[szPrefix .. szSuffix] = nTokenCode
+					tbDeCodeToken[nTokenCode] = { szPrefix, szSuffix }
 					nTokenCode = nTokenCode + 1
 					--前缀放入输出流
 					szSource = lzwDecodeToSource(szSource, tbDeCodeToken, szPrefix)
@@ -71,8 +76,9 @@ function lzwDecode(tbCode, tbChar)
 						tbToken[szPrefix .. szPrefix] = nTokenCode
 						tbDeCodeToken[nTokenCode] = { szPrefix, szPrefix }
 					else
-						tbToken[szPrefix .. tbDeCodeToken[tonumber(szPrefix)][1]] = nTokenCode
-						tbDeCodeToken[nTokenCode] = { szPrefix, tbDeCodeToken[tonumber(szPrefix)][1] }
+						local szSuffix = lzwFindFirstNormalChar(tbDeCodeToken, tbDeCodeToken[tonumber(szPrefix)][1])
+						tbToken[szPrefix .. szSuffix] = nTokenCode
+						tbDeCodeToken[nTokenCode] = { szPrefix, szSuffix }
 					end
 					nTokenCode = nTokenCode + 1
 					--前缀放入输出流
@@ -87,10 +93,9 @@ function lzwDecode(tbCode, tbChar)
 end
 
 print(szSource)
-local tbCode = lzwCode(szSource)
+local tbCode, tbChar = lzwCode(szSource)
 print(table.concat(tbCode, ","))
 print(lzwDecode(tbCode, tbChar))
-
 
 
 
